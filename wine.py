@@ -2,7 +2,7 @@ import csv
 import math
 from collections import Counter
 
-filename = "winequality-red.csv"
+filename = "datasets/winequality-red.csv"
 
 # initializing the titles and rows list
 fields = []
