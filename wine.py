@@ -1,39 +1,43 @@
 import csv
 import math
 from collections import Counter
+import numpy as np
+
 
 filename = "datasets/winequality-red.csv"
 
 # initializing the titles and rows list
 fields = []
 total_set = [] #first half training, second half testing
+normalized_set = []
 qualities = []
 
 
 def correlate_freqs(v1,v2):
 
-    numerator = 0
-    v1_mag = 0
-    v2_mag = 0
+    num_correct = 0
 
     for i in range(len(v1)):
-        numerator += ( v1[i] * v2[(i)%len(v2)] )
-        v1_mag += math.pow(v1[i], 2)
-        v2_mag += math.pow(v2[(i)%len(v2)], 2)
+        if (v1[i] == v2[i]):
+            num_correct += 1
 
-    v1_mag = math.sqrt(v1_mag)
-    v2_mag = math.sqrt(v2_mag)
-
-    return numerator / (v1_mag * v2_mag)
+    return num_correct
 
 
 def normalization(array):
-    maximum = max(array)
-    minimum = min(array)
+    # maximum = max(array)
+    # minimum = min(array)
     normalized_list = []
-    for element in array:
-        e = element
-        normalized_list.append((e - minimum) / (maximum - minimum))
+
+    #print(total_set)
+
+    maximum = np.maximum.reduce(total_set)
+    minimum = np.minimum.reduce(total_set)
+
+    for i in range(len(array)):
+        e = array[i]
+
+        normalized_list.append((e - minimum[i]) / (maximum[i] - minimum[i]))
 
     return normalized_list
 
@@ -50,7 +54,18 @@ with open(filename, 'r') as csvfile:
         spliced_row = row[0].split(";")
         floated_row = [float(i) for i in spliced_row]
         qualities.append(floated_row.pop())
-        total_set.append(normalization(floated_row))
+        total_set.append(floated_row)
+
+    for row in range(len(total_set)):
+        #print(total_set[row])
+        normalized_set.append(normalization(total_set[row]))
+        # print(normalized_set[row])
+        # print("___")
+
+# print(normalized_set)
+# print(total_set)
+# print(len(normalized_set))
+# print(len(total_set))
 
 def euclidian_distance(row1, row2):
     distance = 0
@@ -141,11 +156,11 @@ def weighted_KNN_classification(test_set, element,k):
 #first half is test
 #second half we use classify
 
-list_of_ks = [1, 5, 10, 15, 30, 45, 55, 65, 75, 500]
+list_of_ks = [1, 5, 10, 15, 30, 45, 55, 65, 75, 85, 95, 155, 165, 175]
 
+# list_of_ks = [799]
 
-
-mid = len(total_set)//2
+mid = len(normalized_set)//2
 
 set_of_predictions = []
 
@@ -155,20 +170,23 @@ for k in list_of_ks:
 
     for x in range(mid):
 
-        predictions.append(weighted_KNN_classification(total_set[mid:], total_set[x], k))
+        predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
     set_of_predictions.append(predictions)
 
 
 # print(predictions)
 # print(qualities[:mid])
+
+total = 0
+
 for x in set_of_predictions:
-    print(correlate_freqs(x, qualities[:mid]))
 
-#     for x in range((len(total_set) - 1) / 2) :
-        
+    total += correlate_freqs(x, qualities[:mid])
 
-#     classifications_per_k.append(appended)
+total = total / len(set_of_predictions)
+
+print( "Average error rate w/o weights: " + str(1 - (total / 799)) )
 
 
 #potentially choosing the optimal K if we have time
