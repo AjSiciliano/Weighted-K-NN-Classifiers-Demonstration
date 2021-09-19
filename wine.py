@@ -2,7 +2,7 @@ import csv
 import math
 from collections import Counter
 import numpy as np
-
+import random
 
 filename = "datasets/winequality-red.csv"
 
@@ -58,6 +58,10 @@ with open(filename, 'r') as csvfile:
         qualities.append(floated_row.pop())
         total_set.append(floated_row)
 
+    
+
+    # print(total_set)
+
     for row in range(len(total_set)):
         #print(total_set[row])
         normalized_set.append(normalization(total_set[row]))
@@ -96,6 +100,7 @@ def euclidian_distance(row1, row2):
 # print(Counter(NN).most_common(1))
 
 mid = len(normalized_set)//2
+
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
