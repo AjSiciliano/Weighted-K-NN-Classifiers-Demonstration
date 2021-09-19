@@ -4,6 +4,9 @@ from collections import Counter
 import numpy as np
 import random
 
+import matplotlib.pyplot as plt
+import matplotlib.markers
+
 filename = "datasets/iris.data"
 
 # initializing the titles and rows list
@@ -64,6 +67,8 @@ with open(filename, 'r') as csvfile:
 
         shuffled.append(row)
 
+    random.seed(4)
+
     random.shuffle(shuffled)
 
     for row in shuffled:
@@ -96,7 +101,7 @@ def euclidian_distance(row1, row2):
 
 mid = len(normalized_set)//2
 
-list_of_ks = [15]
+list_of_ks = [22]
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -157,14 +162,39 @@ for i in range(100):
 
 total = 0
 
+avg_set_of_predict = [0] * len(qualities[:mid])
+
 for x in set_of_predictions:
     # print(x)
     total += correlate_freqs(x, qualities[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
 total = total / len(set_of_predictions)
 
-print( "Average error rate w/o weights: " + str(1 - (total / len(qualities))) )
-print( "Average error rate w/o weights: " + str(total)) 
+for e in range(len(avg_set_of_predict)):
+    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
+
+avg_set_of_predict = set_of_predictions[0]
+
+def plot(actual, prediction, name, figure):
+
+    r = {0:[],1:[],2:[]}
+
+    for x in range(len(actual)):
+        r[int(classification(actual[x]))].append(classification(prediction[x]))
+
+    print(r)
+    b = 2
+
+    plt.figure(figure)
+    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+
+plot(qualities[:mid], avg_set_of_predict, "unweighted", 0)
+
+print( "Average error rate w/o weights: " + str(1 - (total / len(qualities[:mid]))) )
+print( "Average correct rate w/o weights: " + str((total / len(qualities[:mid]))) )
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -228,16 +258,47 @@ for i in range(100):
 
 total = 0
 
+avg_set_of_predict = [0] * len(qualities[:mid])
+
+graphed_set = [qualities[:mid], avg_set_of_predict]
+
 for x in set_of_predictions:
     # print(x)
     total += correlate_freqs(x, qualities[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
 total = total / len(set_of_predictions)
 
-print( "Average error rate w/weights: " + str(1 - (total / len(qualities))) )
-print( "Average error rate w/weights: " + str(total) )
+for e in range(len(avg_set_of_predict)):
+    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
+
+qualities_to_num = []
+
+for x in qualities[:mid]:
+    qualities_to_num.append(classification(x))
+
+graphed_set = [qualities_to_num, avg_set_of_predict]
+
+print(avg_set_of_predict)
+
+plot(qualities[:mid], avg_set_of_predict, "weighted", 1)
+
+print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
+print( "Average correct rate w/weights: " + str((total / len(qualities[:mid]))) )
 
 
+# plot lines
+# plt.plot(x, y, label = "line 1")
+
+
+leg = plt.legend()
+
+leg_lines = leg.get_lines()
+
+plt.setp(leg_lines, linewidth=.1)
+
+plt.show()
 
 
 

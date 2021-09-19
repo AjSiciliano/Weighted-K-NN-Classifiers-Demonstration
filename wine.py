@@ -4,6 +4,9 @@ from collections import Counter
 import numpy as np
 import random
 
+import matplotlib.pyplot as plt
+import matplotlib.markers
+
 filename = "datasets/winequality-red.csv"
 
 # initializing the titles and rows list
@@ -11,7 +14,6 @@ fields = []
 total_set = [] #first half training, second half testing
 normalized_set = []
 qualities = []
-
 
 def correlate_freqs(v1,v2):
 
@@ -52,13 +54,24 @@ with open(filename, 'r') as csvfile:
     fields = next(csvreader)
   
     # extracting each data row one by one
+
+    shuffled = []
+
+    # extracting each data row one by one
     for row in csvreader:
+
+        shuffled.append(row)
+
+    random.seed(4)
+
+    random.shuffle(shuffled)
+
+    for row in shuffled:
         spliced_row = row[0].split(";")
         floated_row = [float(i) for i in spliced_row]
         qualities.append(floated_row.pop())
         total_set.append(floated_row)
 
-    
 
     # print(total_set)
 
@@ -101,7 +114,6 @@ def euclidian_distance(row1, row2):
 
 mid = len(normalized_set)//2
 
-
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
     index = 0
@@ -127,7 +139,6 @@ def unweighted_KNN_classification(test_set, element,k):
 
         new_list[(i)] = len(above_dict[i])
 
-
     return max(new_list, key=new_list.get)
 
 
@@ -136,9 +147,9 @@ def unweighted_KNN_classification(test_set, element,k):
 
 #list_of_ks = [1, 5, 10, 15, 30, 45, 55, 65, 75, 85, 95, 155, 165, 175]
 
-# list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
+list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
 
-list_of_ks = [77]
+# list_of_ks = [77]
 
 
 set_of_predictions = []
@@ -159,14 +170,38 @@ for k in list_of_ks:
 
 total = 0
 
+avg_set_of_predict = [0] * len(qualities[:mid])
+
 for x in set_of_predictions:
     # print(x)
     total += correlate_freqs(x, qualities[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
 total = total / len(set_of_predictions)
 
+# for e in range(len(avg_set_of_predict)):
+#     avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
+avg_set_of_predict = set_of_predictions[0]
+
+def plot(actual, prediction, name, figure):
+
+    r = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[]}
+
+    for x in range(len(actual)):
+        r[int(actual[x])].append(prediction[x])
+
+    b = 9
+
+    plt.figure(figure)
+    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+
+plot(qualities[:mid], avg_set_of_predict, "unweighted", 0)
+
+
 print( "Average error rate w/o weights: " + str(1 - (total / len(qualities[:mid]))) )
-print( "Average error rate w/o weights: " + str(total)) 
+print( "Average correct rate w/o weights: " + str((total / len(qualities[:mid]))) )
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -234,15 +269,35 @@ for k in list_of_ks:
 
 total = 0
 
+avg_set_of_predict = [0] * len(qualities[:mid])
+
 for x in set_of_predictions:
     # print(x)
     total += correlate_freqs(x, qualities[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
 total = total / len(set_of_predictions)
 
-print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
-print( "Average error rate w/weights: " + str(total) )
+for e in range(len(avg_set_of_predict)):
+    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
 
+# plt.plot(list(range(0,len(qualities[:mid]))),avg_set_of_predict,label = "weighted", linewidth=.5)
+
+# plot(qualities[:mid], avg_set_of_predict, "weighted")
+
+plot(qualities[:mid], avg_set_of_predict, "weighted", 1)
+
+print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
+print( "Average correct rate w/weights: " + str((total / len(qualities[:mid]))) )
+
+
+
+leg = plt.legend()
+
+leg_lines = leg.get_lines()
+
+plt.show()
 
 
 #     distances_to_k = [total_distances[i] for i in range(k)]

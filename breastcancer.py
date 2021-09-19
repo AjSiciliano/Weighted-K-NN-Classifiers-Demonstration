@@ -11,15 +11,17 @@ filename = "datasets/breast-cancer-wisconsin.data"
 fields = []
 total_set = [] #first half training, second half testing
 normalized_set = []
+
 benign_or_malignant = []
 
 def correlate_freqs(v1,v2):
 
     num_correct = 0
 
+
     for i in range(len(v1)):
         
-        if (v1[i] == v2[i]):
+        if (v1[i] == int(v2[i])):
             num_correct += 1
 
     return num_correct
@@ -29,8 +31,8 @@ def normalization(array):
 
     normalized_list = []
 
-    maximum = np.maximum.reduce(full_data)
-    minimum = np.minimum.reduce(full_data)
+    maximum = np.maximum.reduce(total_set)
+    minimum = np.minimum.reduce(total_set)
 
     for i in range(len(array)):
         e = array[i]
@@ -40,18 +42,58 @@ def normalization(array):
     return normalized_list
 
 
-df = pd.read_csv('datasets/breast-cancer-wisconsin.data')
-df.replace('?',-99999,inplace=True)
-#drop unnecessary columns (id and class) ...also test without drop
-df.drop(['id'],1,inplace=True)
-df.drop(['class'],1,inplace=True)
+with open(filename, 'r') as csvfile:
+    # creating a csv reader object
+    csvreader = csv.reader(csvfile)
+      
+    # extracting field names through first row
+    fields = next(csvreader)
 
-#df has random quotes. Convert all to float
-full_data = df.astype(float).values.tolist()
-        
-for row in range(len(full_data)):
+    shuffled = []
+
+    # extracting each data row one by one
+    for row in csvreader:
+
+        shuffled.append(row)
+
+    #random.shuffle(shuffled)
+
+    for row in shuffled:
+
+        # print(row)
+
+        floated_row = []
+
+        for i in range(len(row)-1):
+            if(row[i] != '?'):
+                floated_row.append(float(row[i]))
+            else:
+                floated_row.append(0)
+
+
+        total_set.append(floated_row)
+
+        # print(row)
+        # print(row[-1])
+        benign_or_malignant.append(row[-1])
+
+        # print(floated_row)
+
+
+# df = pd.read_csv('datasets/breast-cancer-wisconsin.data')
+# df.replace('?',-99999,inplace=True)
+# #drop unnecessary columns (id and class) ...also test without drop
+# df.drop(['id'],1,inplace=True)
+# df.drop(['class'],1,inplace=True)
+
+# #df has random quotes. Convert all to float
+# full_data = df.astype(float).values.tolist()
+
+
+
+for row in range(len(total_set)):
     #print(total_set[row])
-    normalized_set.append(normalization(full_data[row]))
+    normalized_set.append(normalization(total_set[row]))
     # print(normalized_set[row])
 
 def euclidian_distance(row1, row2):
@@ -62,14 +104,15 @@ def euclidian_distance(row1, row2):
 
     return math.pow(distance, 1/2)
 
-mid = len(normalized_set)//2
+
+mid = len(total_set)//2
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
     index = 0
     
     for x in test_set:
-        total_distances.append([euclidian_distance(x,element), benign_or_malignant[index]])
+        total_distances.append([euclidian_distance([x[i] for i in range(len(x)-1)],element),  benign_or_malignant[mid + index]])
         index += 1
 
     total_distances.sort()
@@ -83,16 +126,18 @@ def unweighted_KNN_classification(test_set, element,k):
         #if distance[-1] == (float)above_dict[i]:
         above_dict[int(distance[-1])].append(distance[0])
 
-    new_list = {0,0}
+    new_list = {}
 
+
+    # print(above_dict)
     for i in above_dict: 
 
         new_list[(i)] = len(above_dict[i])
 
-
+    # print(max(new_list, key=new_list.get))
     return max(new_list, key=new_list.get)
 
-list_of_ks = [77]
+list_of_ks = [15]
 
 set_of_predictions = []
 
@@ -101,6 +146,11 @@ for k in list_of_ks:
     predictions = []
 
     for x in range(mid):
+
+
+        # print(len(normalized_set[mid:]))
+        # print(len(normalized_set))
+        # print(mid)
 
         predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
@@ -115,7 +165,7 @@ for x in set_of_predictions:
 total = total / len(set_of_predictions)
 
 print( "Average error rate w/o weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
-print( "Average error rate w/o weights: " + str(total)) 
+print( "Average correct rate w/o weights: " + str((total / len(benign_or_malignant[:mid]))) )
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -123,7 +173,7 @@ def weighted_KNN_classification(test_set, element,k):
     index = 0
     
     for x in test_set:
-        print(x)
+        # print(x)
         total_distances.append([euclidian_distance(x,element),  benign_or_malignant[mid + index]])
         index += 1
 
@@ -144,19 +194,19 @@ def weighted_KNN_classification(test_set, element,k):
 
     new_list = [0,0]
 
+
+    c = 0
     for i in above_dict: 
-       
+        
         for d in above_dict[i]:
 
             if maximum != minimum:
-                new_list[i] += ((maximum - d) / (maximum - minimum))
+                new_list[c] += ((maximum - d) / (maximum - minimum))
             else:
-                new_list[i] += 1
+                new_list[c] += 1
 
-
-    return new_list.index(max(new_list))
-    
-
+        c += 1
+    return new_list.index(max(new_list))*2 + 2
 
 
 mid = len(normalized_set)//2
@@ -182,4 +232,9 @@ for x in set_of_predictions:
 total = total / len(set_of_predictions)
 
 print( "Average error rate w/weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
-print( "Average error rate w/weights: " + str(total) )
+print( "Average correct rate w/weights: " + str((total / len(benign_or_malignant[:mid]))) )
+
+
+
+
+
