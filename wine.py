@@ -18,8 +18,10 @@ def correlate_freqs(v1,v2):
     num_correct = 0
 
     for i in range(len(v1)):
+        
         if (v1[i] == v2[i]):
             num_correct += 1
+            # print("YAY")
 
     return num_correct
 
@@ -93,13 +95,14 @@ def euclidian_distance(row1, row2):
 
 # print(Counter(NN).most_common(1))
 
+mid = len(normalized_set)//2
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
     index = 0
     
     for x in test_set:
-        total_distances.append([euclidian_distance([x[i] for i in range(len(x)-1)],element),  qualities[index]])
+        total_distances.append([euclidian_distance([x[i] for i in range(len(x)-1)],element),  qualities[mid + index]])
         index += 1
 
     total_distances.sort()
@@ -128,9 +131,10 @@ def unweighted_KNN_classification(test_set, element,k):
 
 #list_of_ks = [1, 5, 10, 15, 30, 45, 55, 65, 75, 85, 95, 155, 165, 175]
 
-list_of_ks = [55]
+# list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
 
-mid = len(normalized_set)//2
+list_of_ks = [77]
+
 
 set_of_predictions = []
 
@@ -156,8 +160,8 @@ for x in set_of_predictions:
 
 total = total / len(set_of_predictions)
 
-print( "Average error rate w/o weights: " + str(total) )
-
+print( "Average error rate w/o weights: " + str(1 - (total / len(qualities[:mid]))) )
+print( "Average error rate w/o weights: " + str(total)) 
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -165,17 +169,21 @@ def weighted_KNN_classification(test_set, element,k):
     index = 0
     
     for x in test_set:
-        total_distances.append([euclidian_distance([x[i] for i in range(len(x)-1)],element),  qualities[index]])
+        total_distances.append([euclidian_distance([x[i] for i in range(len(x)-1)],element), qualities[mid + index]])
         index += 1
 
     total_distances.sort()
-
+    # print(total_distances)
 
     distances_to_k = [total_distances[i] for i in range(k)]
     distances = [total_distances[i][0] for i in range(len(distances_to_k))]
 
+    #print(distances)
     maximum = max(distances)
     minimum = min(distances)
+
+    # print(maximum)
+    # print(minimum)
 
     #we do the implementation below because for any k value, we need to keep track of the classes that appear to be our NN
     above_dict = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[]}
@@ -189,16 +197,17 @@ def weighted_KNN_classification(test_set, element,k):
     for i in above_dict: 
         # print(i)
         for d in above_dict[i]:
-            # print(d)
+
             if maximum != minimum:
-                new_list[i] += (maximum - d) / (maximum - minimum)
+                new_list[i] += ((maximum - d) / (maximum - minimum))
             else:
                 new_list[i] += 1
+
 
     return new_list.index(max(new_list))
     
 
-list_of_ks = [55]
+# list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
 
 mid = len(normalized_set)//2
 
@@ -226,6 +235,7 @@ for x in set_of_predictions:
 
 total = total / len(set_of_predictions)
 
+print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
 print( "Average error rate w/weights: " + str(total) )
 
 
