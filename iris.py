@@ -15,7 +15,7 @@ total_set = [] #first half training, second half testing
 normalized_set = []
 qualities = []
 
-def classification(name):
+def classification(name): #Associate the class name to a number
 
     if name == "Iris-setosa":
         return 0
