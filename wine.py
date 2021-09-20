@@ -68,6 +68,9 @@ def unweighted_KNN_classification(test_set, element,k):
 
         class_dict[int(distance[-1])].append(distance[0])
 
+    #each index is associated with the number of nodes with that 
+    #class where class = index in nearest neighbors
+
     new_list = {}
 
     for i in class_dict: 
@@ -98,6 +101,7 @@ def weighted_KNN_classification(test_set, element,k):
 
         class_dict[int(distance[-1])].append(distance[0])
 
+    #each index is associated with the sum of the weight for that class where class = index
     new_list = [0,0,0,0,0,0,0,0,0,0,0]
 
     for i in class_dict: 
@@ -142,7 +146,8 @@ def plot(actual, prediction, name, figure):
 #https://www.geeksforgeeks.org/working-csv-files-python/
 with open(filename, 'r') as csvfile:
     csvreader = csv.reader(csvfile)
-    fields = next(csvreader)
+    
+    next(csvreader)
 
     shuffled = []
 

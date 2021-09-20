@@ -15,15 +15,6 @@ total_set = [] #first half training, second half testing
 normalized_set = []
 qualities = []
 
-def classification(name): #Associate the class name to a number
-
-    if name == "Iris-setosa":
-        return 0
-    elif name == "Iris-versicolor":
-        return 1
-    else:
-        return 2
-
 def correlate_freqs(v1,v2):
 
     num_correct = 0
@@ -35,12 +26,26 @@ def correlate_freqs(v1,v2):
 
     return num_correct
 
-def normalization(array):
-    # maximum = max(array)
-    # minimum = min(array)
-    normalized_list = []
+def euclidian_distance(row1, row2):
+    distance = 0
 
-    #print(total_set)
+    for features in range(len(row1)):
+        distance += math.pow(float(row1[features]) - float(row2[features]), 2)
+
+    return math.pow(distance, 1/2)
+
+def classification(name): 
+    #Associate the class name to a number
+    if name == "Iris-setosa":
+        return 0
+    elif name == "Iris-versicolor":
+        return 1
+    else:
+        return 2
+
+def normalization(array):
+    #Normalize the attributes in respect to eachother in each column
+    normalized_list = []
 
     maximum = np.maximum.reduce(total_set)
     minimum = np.minimum.reduce(total_set)
@@ -52,13 +57,15 @@ def normalization(array):
 
     return normalized_list
 
+#___________________________IMPLEMENTATION BELOW___________________________
+
+#read and splice the data
+
 #https://www.geeksforgeeks.org/working-csv-files-python/
 with open(filename, 'r') as csvfile:
     # creating a csv reader object
     csvreader = csv.reader(csvfile)
-      
-    # extracting field names through first row
-    fields = next(csvreader)
+
 
     shuffled = []
 
@@ -89,15 +96,6 @@ with open(filename, 'r') as csvfile:
         normalized_set.append(normalization(total_set[row]))
     # print(normalized_set)
 
-
-def euclidian_distance(row1, row2):
-    distance = 0
-
-    for features in range(len(row1)):
-        distance += math.pow(float(row1[features]) - float(row2[features]), 2)
-
-    return math.pow(distance, 1/2)
-    
 
 mid = len(normalized_set)//2
 

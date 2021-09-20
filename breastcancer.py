@@ -44,25 +44,17 @@ def normalization(array):
     return normalized_list
 
 
+#___________________________IMPLEMENTATION BELOW___________________________
+
+#read and splice the data
+
+#https://www.geeksforgeeks.org/working-csv-files-python/
 with open(filename, 'r') as csvfile:
-    # creating a csv reader object
     csvreader = csv.reader(csvfile)
       
-    # extracting field names through first row
-    fields = next(csvreader)
+    next(csvreader)
 
-    shuffled = []
-
-    # extracting each data row one by one
     for row in csvreader:
-
-        shuffled.append(row)
-
-    #random.shuffle(shuffled)
-
-    for row in shuffled:
-
-        # print(row)
 
         floated_row = []
 
@@ -72,31 +64,15 @@ with open(filename, 'r') as csvfile:
             else:
                 floated_row.append(0)
 
-
         total_set.append(floated_row)
 
-        # print(row)
-        # print(row[-1])
         benign_or_malignant.append(row[-1])
 
-        # print(floated_row)
-
-
-# df = pd.read_csv('datasets/breast-cancer-wisconsin.data')
-# df.replace('?',-99999,inplace=True)
-# #drop unnecessary columns (id and class) ...also test without drop
-# df.drop(['id'],1,inplace=True)
-# df.drop(['class'],1,inplace=True)
-
-# #df has random quotes. Convert all to float
-# full_data = df.astype(float).values.tolist()
-
-
-
 for row in range(len(total_set)):
-    #print(total_set[row])
     normalized_set.append(normalization(total_set[row]))
-    # print(normalized_set[row])
+
+
+#___________________________RUNNING BELOW____________________________________
 
 def euclidian_distance(row1, row2):
     distance = 0

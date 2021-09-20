@@ -15,17 +15,6 @@ total_set = [] #first half training, second half testing
 normalized_set = []
 qualities = []
 
-def count_correct(v1,v2):
-
-    num_correct = 0
-
-    for i in range(len(v1)):
-        
-        if (v1[i] == v2[i]):
-            num_correct += 1
-
-    return num_correct
-
 def normalization(array):
     #Normalize the attributes in respect to eachother in each column
     normalized_list = []
@@ -43,26 +32,20 @@ def normalization(array):
 #___________________________IMPLEMENTATION BELOW___________________________
 
 #read and splice the data
-
 #https://www.geeksforgeeks.org/working-csv-files-python/
 with open(filename, 'r') as csvfile:
-    # creating a csv reader object
     csvreader = csv.reader(csvfile)
-      
-    # extracting field names through first row
     fields = next(csvreader)
-  
+
     shuffled = []
 
-    # extracting each data row one by one
     for row in csvreader:
 
         shuffled.append(row)
 
-    random.seed(4)
+    random.seed(4) #Seed for replication
 
     random.shuffle(shuffled)
-
 
     for row in shuffled:
         spliced_row = row[0].split(";")
@@ -70,15 +53,15 @@ with open(filename, 'r') as csvfile:
         qualities.append(floated_row.pop())
         total_set.append(floated_row)
 
-    # print(total_set)
-
     for row in range(len(total_set)):
-        #print(total_set[row])
         normalized_set.append(normalization(total_set[row]))
 
-
+#get the middle index for splitting the data into two sections
+#first half is test
+#second half we use classify
 mid = len(normalized_set)//2
-k = int(math.pow(len(qualities[:mid]), 1/2))
+
+k = int(math.pow(len(qualities[:mid]), 1/2)) #add more k's to get average of multiple k's
 
 #___________________________RUNNING BELOW____________________________________
 
