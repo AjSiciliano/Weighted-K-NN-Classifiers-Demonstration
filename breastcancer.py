@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import random
 
+import matplotlib.pyplot as plt
+import matplotlib.markers
+
 filename = "datasets/breast-cancer-wisconsin.data"
 
 # initializing the titles and rows list
@@ -164,6 +167,28 @@ for x in set_of_predictions:
 
 total = total / len(set_of_predictions)
 
+avg_set_of_predict = set_of_predictions[0]
+
+def plot(actual, prediction, name, figure):
+
+    r = {2:[],4:[]}
+
+    for x in range(len(actual)):
+        r[int(actual[x])].append(prediction[x])
+
+    b = 4
+
+    print(len(r[2]))
+    print(len(r[4]))
+
+    # print(r)
+
+    plt.figure(figure)
+    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+
+plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
+
 print( "Average error rate w/o weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
 print( "Average correct rate w/o weights: " + str((total / len(benign_or_malignant[:mid]))) )
 
@@ -225,14 +250,27 @@ for k in list_of_ks:
 
 total = 0
 
+avg_set_of_predict = set_of_predictions[0]
+
 for x in set_of_predictions:
     # print(x)
     total += correlate_freqs(x, benign_or_malignant[:mid])
 
 total = total / len(set_of_predictions)
 
+plot(benign_or_malignant[:mid], avg_set_of_predict, "weighted", 1)
+
 print( "Average error rate w/weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
 print( "Average correct rate w/weights: " + str((total / len(benign_or_malignant[:mid]))) )
+
+
+leg = plt.legend()
+
+leg_lines = leg.get_lines()
+
+plt.setp(leg_lines, linewidth=.1)
+
+plt.show()
 
 
 
