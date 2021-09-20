@@ -21,7 +21,6 @@ def correlate_freqs(v1,v2):
 
     num_correct = 0
 
-
     for i in range(len(v1)):
         
         if (v1[i] == int(v2[i])):
@@ -172,20 +171,26 @@ avg_set_of_predict = set_of_predictions[0]
 def plot(actual, prediction, name, figure):
 
     r = {2:[],4:[]}
-
+    num_correct = {2:0,4:0}
     for x in range(len(actual)):
         r[int(actual[x])].append(prediction[x])
 
-    b = 4
+        if(int(actual[x]) == prediction[x]):
+            num_correct[int(actual[x])] += 1
 
-    print(len(r[2]))
-    print(len(r[4]))
+    for x in r:
+        print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
 
-    # print(r)
+    # b = 4
 
-    plt.figure(figure)
-    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
-    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+    # print(len(r[2]))
+    # print(len(r[4]))
+
+    # # print(r)
+
+    # plt.figure(figure)
+    # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
 plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
 

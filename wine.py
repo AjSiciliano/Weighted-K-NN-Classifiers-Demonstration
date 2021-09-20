@@ -188,14 +188,20 @@ def plot(actual, prediction, name, figure):
 
     r = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[]}
 
+    num_correct = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0}
+
     for x in range(len(actual)):
         r[int(actual[x])].append(prediction[x])
 
-    b = 9
+        if(int(actual[x]) == prediction[x]):
+            num_correct[int(actual[x])] += 1
 
-    plt.figure(figure)
-    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
-    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+    for x in r:
+        if (len(r[x]) != 0):
+            print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
+
+
+    # c
 
 plot(qualities[:mid], avg_set_of_predict, "unweighted", 0)
 

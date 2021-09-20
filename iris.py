@@ -181,15 +181,23 @@ def plot(actual, prediction, name, figure):
 
     r = {0:[],1:[],2:[]}
 
+    num_correct = {0:0,1:0,2:0}
+
     for x in range(len(actual)):
         r[int(classification(actual[x]))].append(prediction[x])
 
+        if(int(classification(actual[x])) == prediction[x]):
+            num_correct[classification(actual[x])] += 1
 
-    b = 2
+    for x in r:
+        print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
 
-    plt.figure(figure)
-    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
-    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+
+    # b = 2
+
+    # plt.figure(figure)
+    # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
 plot(qualities[:mid], avg_set_of_predict, "unweighted", 0)
 
