@@ -3,9 +3,9 @@ import math
 from collections import Counter
 import numpy as np
 import random
-
 import matplotlib.pyplot as plt
 import matplotlib.markers
+from main import *
 
 filename = "datasets/winequality-red.csv"
 
@@ -14,18 +14,6 @@ fields = []
 total_set = [] #first half training, second half testing
 normalized_set = []
 qualities = []
-
-def count_correct(v1,v2):
-    #Count the number of similarities between v1 and v2
-
-    num_correct = 0
-
-    for i in range(len(v1)):
-        
-        if (v1[i] == v2[i]):
-            num_correct += 1
-
-    return num_correct
 
 def normalization(array):
     #Normalize the attributes in respect to eachother in each column
@@ -40,15 +28,6 @@ def normalization(array):
         normalized_list.append((e - minimum[i]) / (maximum[i] - minimum[i]))
 
     return normalized_list
-
-def euclidian_distance(row1, row2):
-    #Calculate euclidian distance between two vectors r1 and r2
-    distance = 0
-
-    for features in range(len(row1)):
-        distance += math.pow(float(row1[features]) - float(row2[features]), 2)
-
-    return math.pow(distance, 1/2)
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -115,7 +94,6 @@ def weighted_KNN_classification(test_set, element,k):
 
     return new_list.index(max(new_list))
 
-
 #method used to plot example graphs and find figures for individual attributes
 def plot(actual, prediction, name, figure):
 
@@ -133,12 +111,13 @@ def plot(actual, prediction, name, figure):
         if (len(r[x]) != 0):
             print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
 
+    #if ploting uncomment below lines and uncomment plot lines at very end of code as well
+
     # b = 9 #-> the class number associated to graph
 
     # plt.figure(figure)
     # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
     # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
-
 
 #___________________________IMPLEMENTATION BELOW___________________________
 
@@ -146,7 +125,7 @@ def plot(actual, prediction, name, figure):
 #https://www.geeksforgeeks.org/working-csv-files-python/
 with open(filename, 'r') as csvfile:
     csvreader = csv.reader(csvfile)
-    
+
     next(csvreader)
 
     shuffled = []
@@ -173,26 +152,25 @@ with open(filename, 'r') as csvfile:
 #second half we use classify
 mid = len(normalized_set)//2
 
-list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))] #add more k's to get average of multiple k's
+k = int(math.pow(len(qualities[:mid]), 1/2)) #add more k's to get average of multiple k's
 
 #________ UNWEIGHTED ________
 
 set_of_predictions = []
 
-for k in list_of_ks:
+predictions = []
 
-    predictions = []
+for x in range(mid):
 
-    for x in range(mid):
+    predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
-        predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
-
-    set_of_predictions.append(predictions)
+set_of_predictions.append(predictions)
 
 total = 0
 
 avg_set_of_predict = [0] * len(qualities[:mid])
 
+#if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
     total += count_correct(x, qualities[:mid])
     for e in range(len(x)):
@@ -216,15 +194,13 @@ print( "Average correct rate w/o weights: " + str((total / len(qualities[:mid]))
 
 set_of_predictions = []
 
-for k in list_of_ks:
+predictions = []
 
-    predictions = []
+for x in range(mid):
 
-    for x in range(mid):
+    predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
-        predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
-
-    set_of_predictions.append(predictions)
+set_of_predictions.append(predictions)
 
 total = 0
 
@@ -233,6 +209,7 @@ total = 0
 #a little redudant, but can be extrapolated for further use in future
 avg_set_of_predict = [0] * len(qualities[:mid])
 
+#if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
     # print(x)
     total += count_correct(x, qualities[:mid])
@@ -251,13 +228,7 @@ plot(qualities[:mid], avg_set_of_predict, "weighted", 1)
 print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
 print( "Average correct rate w/weights: " + str((total / len(qualities[:mid]))) )
 
-
-
 #if ploting uncomment plot lines in plot function, and uncomment below as well
-
-# leg = plt.legend()
-
-# leg_lines = leg.get_lines()
 
 # plt.show()
 

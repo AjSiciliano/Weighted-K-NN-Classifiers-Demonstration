@@ -3,7 +3,7 @@ import math
 from collections import Counter
 import numpy as np
 import random
-
+from main import euclidian_distance
 import matplotlib.pyplot as plt
 import matplotlib.markers
 
@@ -13,26 +13,7 @@ filename = "datasets/iris.data"
 fields = []
 total_set = [] #first half training, second half testing
 normalized_set = []
-qualities = []
-
-def correlate_freqs(v1,v2):
-
-    num_correct = 0
-
-    for i in range(len(v1)):
-        
-        if (v1[i] == classification(v2[i])):
-            num_correct += 1
-
-    return num_correct
-
-def euclidian_distance(row1, row2):
-    distance = 0
-
-    for features in range(len(row1)):
-        distance += math.pow(float(row1[features]) - float(row2[features]), 2)
-
-    return math.pow(distance, 1/2)
+types = []
 
 def classification(name): 
     #Associate the class name to a number
@@ -42,6 +23,18 @@ def classification(name):
         return 1
     else:
         return 2
+
+def count_correct(v1,v2):
+    #Count the number of similarities between v1 and v2
+
+    num_correct = 0
+
+    for i in range(len(v1)):
+        
+        if (v1[i] == classification(v2[i])): #classify strings numerically
+            num_correct += 1
+
+    return num_correct
 
 def normalization(array):
     #Normalize the attributes in respect to eachother in each column
@@ -57,124 +50,7 @@ def normalization(array):
 
     return normalized_list
 
-#___________________________IMPLEMENTATION BELOW___________________________
-
-#read and splice the data
-
-#https://www.geeksforgeeks.org/working-csv-files-python/
-with open(filename, 'r') as csvfile:
-    # creating a csv reader object
-    csvreader = csv.reader(csvfile)
-
-
-    shuffled = []
-
-    # extracting each data row one by one
-    for row in csvreader:
-
-        shuffled.append(row)
-
-    random.seed(4)
-
-    random.shuffle(shuffled)
-
-    for row in shuffled:
-
-        # print(row)
-
-        floated_row = [float(row[i]) for i in range(len(row)-1)]
-        total_set.append(floated_row)
-        # print(row)
-        # print(row[-1])
-        qualities.append(row[-1])
-
-        # print(floated_row)
-
-
-
-    for row in range(len(total_set)):
-        normalized_set.append(normalization(total_set[row]))
-    # print(normalized_set)
-
-
-mid = len(normalized_set)//2
-
-list_of_ks = [22]
-
-def unweighted_KNN_classification(test_set, element,k):
-    total_distances = []
-    index = 0
-    
-    for x in test_set:
-        total_distances.append([euclidian_distance([x[i] for i in range(len(x))],element),  qualities[mid + index]])
-        index += 1
-
-    total_distances.sort()
-
-    total_distances = total_distances[1:]
-
-    distances_to_k = [total_distances[i] for i in range(k)]
-
-    #we do the implementation below because for any k value, we need to keep track of the classes that appear to be our NN
-    above_dict = {0:[],1:[],2:[]}
-
-    for distance in distances_to_k:
-        #if distance[-1] == (float)above_dict[i]:
-
-        above_dict[(classification(distance[-1]))].append(distance[0])
-
-    new_list = {}
-
-    for i in above_dict: 
-
-        new_list[(i)] = len(above_dict[i])
-
-
-    return max(new_list, key=new_list.get)
-
-
-#first half is test
-#second half we use classify
-
-#list_of_ks = [1, 5, 10, 15, 30, 45, 55, 65, 75, 85, 95, 155, 165, 175]
-
-# list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
-
-
-
-set_of_predictions = []
-
-for i in range(100): 
-
-    predictions = []
-
-    for x in range(mid):
-
-        predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], list_of_ks[0]))
-
-    set_of_predictions.append(predictions)
-
-
-# print(predictions)
-# print(qualities[:mid])
-
-total = 0
-
-avg_set_of_predict = [0] * len(qualities[:mid])
-
-for x in set_of_predictions:
-    # print(x)
-    total += correlate_freqs(x, qualities[:mid])
-    for e in range(len(x)):
-        avg_set_of_predict[e] += x[e]
-
-total = total / len(set_of_predictions)
-
-for e in range(len(avg_set_of_predict)):
-    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
-
-avg_set_of_predict = set_of_predictions[0]
-
+#method used to plot example graphs and find figures for individual attributes
 def plot(actual, prediction, name, figure):
 
     r = {0:[],1:[],2:[]}
@@ -188,8 +64,10 @@ def plot(actual, prediction, name, figure):
             num_correct[classification(actual[x])] += 1
 
     for x in r:
-        print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
+        if (len(r[x]) != 0):
+            print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
 
+    #if ploting uncomment below lines and uncomment plot lines at very end of code as well
 
     # b = 2
 
@@ -197,18 +75,13 @@ def plot(actual, prediction, name, figure):
     # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
     # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
-plot(qualities[:mid], avg_set_of_predict, "unweighted", 0)
-
-print( "Average error rate w/o weights: " + str(1 - (total / len(qualities[:mid]))) )
-print( "Average correct rate w/o weights: " + str((total / len(qualities[:mid]))) )
-
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
     
     index = 0
     
     for x in test_set:
-        total_distances.append([euclidian_distance([x[i] for i in range(len(x))],element), qualities[mid + index]])
+        total_distances.append([euclidian_distance([x[i] for i in range(len(x))],element), types[mid + index]])
         index += 1
 
     total_distances.sort()
@@ -218,25 +91,20 @@ def weighted_KNN_classification(test_set, element,k):
     distances_to_k = [total_distances[i] for i in range(k)]
     distances = [total_distances[i][0] for i in range(len(distances_to_k))]
 
-    #print(distances)
     maximum = max(distances)
     minimum = min(distances)
 
-    # print(maximum)
-    # print(minimum)
-
-    #we do the implementation below because for any k value, we need to keep track of the classes that appear to be our NN
-    above_dict = {0:[],1:[],2:[]}
+    class_dict = {0:[],1:[],2:[]}
 
     for distance in distances_to_k:
-        #if distance[-1] == (float)above_dict[i]:
-        above_dict[(classification(distance[-1]))].append(distance[0])
+        class_dict[(classification(distance[-1]))].append(distance[0])
 
+    #each index is associated with the sum of the weight for that class where class = index
     new_list = [0,0,0]
 
-    for i in above_dict: 
+    for i in class_dict: 
         # print(i)
-        for d in above_dict[i]:
+        for d in class_dict[i]:
 
             if maximum != minimum:
                 new_list[i] += ((maximum - d) / (maximum - minimum))
@@ -245,66 +113,158 @@ def weighted_KNN_classification(test_set, element,k):
 
 
     return new_list.index(max(new_list))
-    
 
-# list_of_ks = [int(math.pow(len(qualities[:mid]), 1/2))]
+def unweighted_KNN_classification(test_set, element,k):
+    total_distances = []
+    index = 0
+    
+    for x in test_set:
+        total_distances.append([euclidian_distance([x[i] for i in range(len(x))],element),  types[mid + index]])
+        index += 1
+
+    total_distances.sort()
+
+    total_distances = total_distances[1:]
+
+    distances_to_k = [total_distances[i] for i in range(k)]
+
+    class_dict = {0:[],1:[],2:[]}
+
+    for distance in distances_to_k:
+        class_dict[(classification(distance[-1]))].append(distance[0])
+
+    #each index is associated with the number of nodes with that 
+    #class where class = index in nearest neighbors
+
+    new_list = {}
+
+    for i in class_dict: 
+        #Associate each class with the length of it's respective distance array
+        new_list[(i)] = len(class_dict[i])
+
+    return max(new_list, key=new_list.get)
+
+#___________________________IMPLEMENTATION BELOW___________________________
+
+#read and splice the data
+
+#https://www.geeksforgeeks.org/working-csv-files-python/
+with open(filename, 'r') as csvfile:
+    # creating a csv reader object
+    csvreader = csv.reader(csvfile)
+    
+    shuffled = []
+
+    # extracting each data row one by one
+    for row in csvreader:
+        shuffled.append(row)
+
+    random.seed(4) #seed for replication
+    random.shuffle(shuffled)
+
+    for row in shuffled:
+
+        floated_row = [float(row[i]) for i in range(len(row)-1)]
+        total_set.append(floated_row)
+        types.append(row[-1])
+
+    for row in range(len(total_set)):
+        normalized_set.append(normalization(total_set[row]))
+
+
+#___________________________RUNNING BELOW____________________________________
+
+#first half is test
+#second half we use classify
+mid = len(normalized_set)//2
+
+k = 22
+
+
+#________ UNWEIGHTED ________
+
 
 set_of_predictions = []
+predictions = []
 
-for i in range(100): 
+for x in range(mid):
+    predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
-    predictions = []
-
-    for x in range(mid):
-
-        predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], list_of_ks[0]))
-
-    set_of_predictions.append(predictions)
-
+set_of_predictions.append(predictions)
 
 total = 0
 
-avg_set_of_predict = [0] * len(qualities[:mid])
+avg_set_of_predict = [0] * len(types[:mid])
 
-graphed_set = [qualities[:mid], avg_set_of_predict]
-
+#if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
     # print(x)
-    total += correlate_freqs(x, qualities[:mid])
+    total += count_correct(x, types[:mid])
     for e in range(len(x)):
         avg_set_of_predict[e] += x[e]
 
+
+#average general prediction, num correct / expected correct, aka number of elements in set
 total = total / len(set_of_predictions)
 
 for e in range(len(avg_set_of_predict)):
     avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
 
-qualities_to_num = []
+#grab first prediction, with the first k, since only 1 k used in our implementation
+#use this to average our predictions
+#a little redudant, but can be extrapolated for further use in future
+avg_set_of_predict = set_of_predictions[0]
 
-for x in qualities[:mid]:
-    qualities_to_num.append(classification(x))
+plot(types[:mid], avg_set_of_predict, "unweighted", 0)
 
-graphed_set = [qualities_to_num, avg_set_of_predict]
+print( "Average error rate w/o weights: " + str(1 - (total / len(types[:mid]))) )
+print( "Average correct rate w/o weights: " + str((total / len(types[:mid]))) )
 
-print(avg_set_of_predict)
+#________ WEIGHTED ________
 
-plot(qualities[:mid], avg_set_of_predict, "weighted", 1)
+set_of_predictions = []
+predictions = []
 
-print( "Average error rate w/weights: " + str(1 - (total / len(qualities[:mid]))) )
-print( "Average correct rate w/weights: " + str((total / len(qualities[:mid]))) )
+for x in range(mid):
 
+    predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
-# plot lines
-# plt.plot(x, y, label = "line 1")
+set_of_predictions.append(predictions)
 
+total = 0
 
-leg = plt.legend()
+avg_set_of_predict = [0] * len(types[:mid])
 
-leg_lines = leg.get_lines()
+#if needed can run multiple trails, and should automatically average
+for x in set_of_predictions:
+    total += count_correct(x, types[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
-plt.setp(leg_lines, linewidth=.1)
+#average general prediction, num correct / expected correct, aka number of elements in set
+total = total / len(set_of_predictions)
 
-plt.show()
+for e in range(len(avg_set_of_predict)):
+    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
+
+types_to_num = []
+
+for x in types[:mid]:
+    types_to_num.append(classification(x))
+
+#grab first prediction, with the first k, since only 1 k used in our implementation
+#use this to average our predictions
+#a little redudant, but can be extrapolated for further use in future
+avg_set_of_predict = set_of_predictions[0]
+
+plot(types[:mid], avg_set_of_predict, "weighted", 1)
+
+print( "Average error rate w/weights: " + str(1 - (total / len(types[:mid]))) )
+print( "Average correct rate w/weights: " + str((total / len(types[:mid]))) )
+
+#if ploting uncomment plot lines in plot function, and uncomment below as well
+
+# plt.show()
 
 
 

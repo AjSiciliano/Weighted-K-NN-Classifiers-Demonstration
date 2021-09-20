@@ -14,23 +14,10 @@ filename = "datasets/breast-cancer-wisconsin.data"
 fields = []
 total_set = [] #first half training, second half testing
 normalized_set = []
-
 benign_or_malignant = []
 
-def correlate_freqs(v1,v2):
-
-    num_correct = 0
-
-    for i in range(len(v1)):
-        
-        if (v1[i] == int(v2[i])):
-            num_correct += 1
-
-    return num_correct
-
-
 def normalization(array):
-
+    #Normalize the attributes in respect to eachother in each column
     normalized_list = []
 
     maximum = np.maximum.reduce(total_set)
@@ -43,47 +30,24 @@ def normalization(array):
 
     return normalized_list
 
+def plot(actual, prediction, name, figure):
 
-#___________________________IMPLEMENTATION BELOW___________________________
+    r = {2:[],4:[]}
+    num_correct = {2:0,4:0}
+    for x in range(len(actual)):
+        r[int(actual[x])].append(prediction[x])
 
-#read and splice the data
+        if(int(actual[x]) == prediction[x]):
+            num_correct[int(actual[x])] += 1
 
-#https://www.geeksforgeeks.org/working-csv-files-python/
-with open(filename, 'r') as csvfile:
-    csvreader = csv.reader(csvfile)
-      
-    next(csvreader)
+    for x in r:
+        print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
 
-    for row in csvreader:
+    # b = 4
 
-        floated_row = []
-
-        for i in range(len(row)-1):
-            if(row[i] != '?'):
-                floated_row.append(float(row[i]))
-            else:
-                floated_row.append(0)
-
-        total_set.append(floated_row)
-
-        benign_or_malignant.append(row[-1])
-
-for row in range(len(total_set)):
-    normalized_set.append(normalization(total_set[row]))
-
-
-#___________________________RUNNING BELOW____________________________________
-
-def euclidian_distance(row1, row2):
-    distance = 0
-
-    for features in range(len(row1)):
-        distance += math.pow(float(row1[features]) - float(row2[features]), 2)
-
-    return math.pow(distance, 1/2)
-
-
-mid = len(total_set)//2
+    # plt.figure(figure)
+    # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
 def unweighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -114,64 +78,6 @@ def unweighted_KNN_classification(test_set, element,k):
 
     # print(max(new_list, key=new_list.get))
     return max(new_list, key=new_list.get)
-
-list_of_ks = [15]
-
-set_of_predictions = []
-
-for k in list_of_ks:
-
-    predictions = []
-
-    for x in range(mid):
-
-
-        # print(len(normalized_set[mid:]))
-        # print(len(normalized_set))
-        # print(mid)
-
-        predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
-
-    set_of_predictions.append(predictions)
-
-total = 0
-
-for x in set_of_predictions:
-    
-    total += correlate_freqs(x, benign_or_malignant[:mid])
-
-total = total / len(set_of_predictions)
-
-avg_set_of_predict = set_of_predictions[0]
-
-def plot(actual, prediction, name, figure):
-
-    r = {2:[],4:[]}
-    num_correct = {2:0,4:0}
-    for x in range(len(actual)):
-        r[int(actual[x])].append(prediction[x])
-
-        if(int(actual[x]) == prediction[x]):
-            num_correct[int(actual[x])] += 1
-
-    for x in r:
-        print("class = " + str(x) + " percent correct: " + str(num_correct[x]/len(r[x])))
-
-    # b = 4
-
-    # print(len(r[2]))
-    # print(len(r[4]))
-
-    # # print(r)
-
-    # plt.figure(figure)
-    # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
-    # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
-
-plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
-
-print( "Average error rate w/o weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
-print( "Average correct rate w/o weights: " + str((total / len(benign_or_malignant[:mid]))) )
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -215,7 +121,68 @@ def weighted_KNN_classification(test_set, element,k):
     return new_list.index(max(new_list))*2 + 2
 
 
-mid = len(normalized_set)//2
+
+#___________________________IMPLEMENTATION BELOW___________________________
+
+#read and splice the data
+
+#https://www.geeksforgeeks.org/working-csv-files-python/
+with open(filename, 'r') as csvfile:
+    csvreader = csv.reader(csvfile)
+      
+    next(csvreader)
+
+    for row in csvreader:
+
+        floated_row = []
+
+        for i in range(len(row)-1):
+            if(row[i] != '?'):
+                floated_row.append(float(row[i]))
+            else:
+                floated_row.append(0)
+
+        total_set.append(floated_row)
+
+        benign_or_malignant.append(row[-1])
+
+for row in range(len(total_set)):
+    normalized_set.append(normalization(total_set[row]))
+
+
+#___________________________RUNNING BELOW___________________________
+
+mid = len(total_set)//2
+list_of_ks = [15]
+
+
+#____________UNWEIGHTED____________
+
+set_of_predictions = []
+
+for k in list_of_ks:
+
+    predictions = []
+
+    for x in range(mid):
+        predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
+
+    set_of_predictions.append(predictions)
+
+total = 0
+
+for x in set_of_predictions:
+    total += count_correct(x, benign_or_malignant[:mid])
+
+total = total / len(set_of_predictions)
+avg_set_of_predict = set_of_predictions[0]
+
+plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
+
+print( "Average error rate w/o weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
+print( "Average correct rate w/o weights: " + str((total / len(benign_or_malignant[:mid]))) )
+
+#____________WEIGHTED____________
 
 set_of_predictions = []
 
@@ -234,8 +201,7 @@ total = 0
 avg_set_of_predict = set_of_predictions[0]
 
 for x in set_of_predictions:
-    # print(x)
-    total += correlate_freqs(x, benign_or_malignant[:mid])
+    total += count_correct(x, benign_or_malignant[:mid])
 
 total = total / len(set_of_predictions)
 
@@ -245,13 +211,9 @@ print( "Average error rate w/weights: " + str(1 - (total / len(benign_or_maligna
 print( "Average correct rate w/weights: " + str((total / len(benign_or_malignant[:mid]))) )
 
 
-leg = plt.legend()
+#if ploting uncomment plot lines in plot function, and uncomment below as well
 
-leg_lines = leg.get_lines()
-
-plt.setp(leg_lines, linewidth=.1)
-
-plt.show()
+# plt.show()
 
 
 
