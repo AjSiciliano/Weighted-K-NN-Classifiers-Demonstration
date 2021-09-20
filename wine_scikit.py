@@ -40,7 +40,7 @@ def normalization(array):
 
     return normalized_list
 
-#___________________________IMPLEMENTATION BELOW____________________________________
+#___________________________IMPLEMENTATION BELOW___________________________
 
 #read and splice the data
 

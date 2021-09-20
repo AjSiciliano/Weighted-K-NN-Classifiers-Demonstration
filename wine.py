@@ -136,7 +136,7 @@ def plot(actual, prediction, name, figure):
     # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
 
-#___________________________IMPLEMENTATION BELOW______________________________________________
+#___________________________IMPLEMENTATION BELOW___________________________
 
 #read and splice the data
 #https://www.geeksforgeeks.org/working-csv-files-python/
