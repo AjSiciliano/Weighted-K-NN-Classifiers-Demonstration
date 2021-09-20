@@ -211,7 +211,6 @@ avg_set_of_predict = [0] * len(qualities[:mid])
 
 #if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
-    # print(x)
     total += count_correct(x, qualities[:mid])
     for e in range(len(x)):
         avg_set_of_predict[e] += x[e]

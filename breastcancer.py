@@ -4,7 +4,7 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 import random
-
+from main import *
 import matplotlib.pyplot as plt
 import matplotlib.markers
 
@@ -61,22 +61,22 @@ def unweighted_KNN_classification(test_set, element,k):
 
     distances_to_k = [total_distances[i] for i in range(k)]
 
-    #we do the implementation below because for any k value, we need to keep track of the classes that appear to be our NN
-    above_dict = {2:[],4:[]}
+    
+    class_dict = {2:[],4:[]}
 
     for distance in distances_to_k:
-        #if distance[-1] == (float)above_dict[i]:
-        above_dict[int(distance[-1])].append(distance[0])
+        #if distance[-1] == (float)class_dict[i]:
+        class_dict[int(distance[-1])].append(distance[0])
+
+    #each index is associated with the number of nodes with that 
+    #class where class = index in nearest neighbors
 
     new_list = {}
 
+    for i in class_dict: 
+        #Associate each class with the length of it's respective distance array
+        new_list[(i)] = len(class_dict[i])
 
-    # print(above_dict)
-    for i in above_dict: 
-
-        new_list[(i)] = len(above_dict[i])
-
-    # print(max(new_list, key=new_list.get))
     return max(new_list, key=new_list.get)
 
 def weighted_KNN_classification(test_set, element,k):
@@ -85,7 +85,6 @@ def weighted_KNN_classification(test_set, element,k):
     index = 0
     
     for x in test_set:
-        # print(x)
         total_distances.append([euclidian_distance(x,element),  benign_or_malignant[mid + index]])
         index += 1
 
@@ -94,23 +93,22 @@ def weighted_KNN_classification(test_set, element,k):
     distances_to_k = [total_distances[i] for i in range(k)]
     distances = [total_distances[i][0] for i in range(len(distances_to_k))]
 
-
     maximum = max(distances)
     minimum = min(distances)
 
-    above_dict = {2:[],4:[]}
+
+    class_dict = {2:[],4:[]}
 
     for distance in distances_to_k:
-        #if distance[-1] == (float)above_dict[i]:
-        above_dict[int(distance[-1])].append(distance[0])
+        class_dict[int(distance[-1])].append(distance[0])
 
+    #each index is associated with the sum of the weight for that class where class = index
     new_list = [0,0]
 
-
     c = 0
-    for i in above_dict: 
+    for i in class_dict: 
         
-        for d in above_dict[i]:
+        for d in class_dict[i]:
 
             if maximum != minimum:
                 new_list[c] += ((maximum - d) / (maximum - minimum))
@@ -119,7 +117,6 @@ def weighted_KNN_classification(test_set, element,k):
 
         c += 1
     return new_list.index(max(new_list))*2 + 2
-
 
 
 #___________________________IMPLEMENTATION BELOW___________________________
@@ -153,28 +150,39 @@ for row in range(len(total_set)):
 #___________________________RUNNING BELOW___________________________
 
 mid = len(total_set)//2
-list_of_ks = [15]
+k = 15
 
-
-#____________UNWEIGHTED____________
+#________ UNWEIGHTED ________
 
 set_of_predictions = []
 
-for k in list_of_ks:
+predictions = []
 
-    predictions = []
+for x in range(mid):
 
-    for x in range(mid):
-        predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
-
-    set_of_predictions.append(predictions)
+    predictions.append(unweighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
+set_of_predictions.append(predictions)
 
 total = 0
 
+avg_set_of_predict = [0] * len(benign_or_malignant[:mid])
+
+#if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
+
+    print(count_correct(x, benign_or_malignant[:mid]))
+
     total += count_correct(x, benign_or_malignant[:mid])
 
-total = total / len(set_of_predictions)
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
+
+#average general prediction, num correct / expected correct, aka number of elements in set
+total = total / len(set_of_predictions) 
+
+#grab first prediction, with the first k, since only 1 k used in our implementation
+#use this to average our predictions
+#a little redudant, but can be extrapolated for further use in future
 avg_set_of_predict = set_of_predictions[0]
 
 plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
@@ -182,34 +190,42 @@ plot(benign_or_malignant[:mid], avg_set_of_predict, "unweighted", 0)
 print( "Average error rate w/o weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
 print( "Average correct rate w/o weights: " + str((total / len(benign_or_malignant[:mid]))) )
 
-#____________WEIGHTED____________
+
+#__________ WEIGHTED __________
 
 set_of_predictions = []
 
-for k in list_of_ks:
+predictions = []
 
-    predictions = []
+for x in range(mid):
 
-    for x in range(mid):
+    predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
 
-        predictions.append(weighted_KNN_classification(normalized_set[mid:], normalized_set[x], k))
-
-    set_of_predictions.append(predictions)
+set_of_predictions.append(predictions)
 
 total = 0
 
-avg_set_of_predict = set_of_predictions[0]
+#grab first prediction, with the first k, since only 1 k used in our implementation
+#use this to average our predictions
+#a little redudant, but can be extrapolated for further use in future
+avg_set_of_predict = [0] * len(benign_or_malignant[:mid])
 
+#if needed can run multiple trails, and should automatically average
 for x in set_of_predictions:
     total += count_correct(x, benign_or_malignant[:mid])
+    for e in range(len(x)):
+        avg_set_of_predict[e] += x[e]
 
+#average general prediction, num correct / expected correct, aka number of elements in set
 total = total / len(set_of_predictions)
+
+for e in range(len(avg_set_of_predict)):
+    avg_set_of_predict[e] = avg_set_of_predict[e] / len(set_of_predictions)
 
 plot(benign_or_malignant[:mid], avg_set_of_predict, "weighted", 1)
 
 print( "Average error rate w/weights: " + str(1 - (total / len(benign_or_malignant[:mid]))) )
 print( "Average correct rate w/weights: " + str((total / len(benign_or_malignant[:mid]))) )
-
 
 #if ploting uncomment plot lines in plot function, and uncomment below as well
 

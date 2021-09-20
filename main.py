@@ -9,7 +9,7 @@ def count_correct(v1,v2):
 
     for i in range(len(v1)):
         
-        if (v1[i] == v2[i]):
+        if (v1[i] == float(v2[i])):
             num_correct += 1
 
     return num_correct
