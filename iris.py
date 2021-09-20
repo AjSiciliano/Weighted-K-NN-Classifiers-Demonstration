@@ -182,9 +182,9 @@ def plot(actual, prediction, name, figure):
     r = {0:[],1:[],2:[]}
 
     for x in range(len(actual)):
-        r[int(classification(actual[x]))].append(classification(prediction[x]))
+        r[int(classification(actual[x]))].append(prediction[x])
 
-    print(r)
+
     b = 2
 
     plt.figure(figure)
