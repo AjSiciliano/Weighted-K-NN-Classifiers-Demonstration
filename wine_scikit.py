@@ -86,7 +86,7 @@ print("Unweighted Correct Rate -> " + str(knn_unweighted.score(X_test, y_test)))
 
 X_train_w, X_test_w, y_train_w, y_test_w = train_test_split(normalized_set, qualities, test_size=0.5, random_state=1)
 
-knn_weighted = KNeighborsClassifier(n_neighbors = k, weights='distance') #Print weighted correct weight
+knn_weighted = KNeighborsClassifier(n_neighbors = k, weights='distance')
 
 # Fit the classifier to the data
 knn_weighted.fit(X_train_w,y_train_w)

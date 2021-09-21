@@ -69,11 +69,11 @@ def plot(actual, prediction, name, figure):
 
     #if ploting uncomment below lines and uncomment plot lines at very end of code as well
 
-    b = 2
+    # b = 2
 
-    plt.figure(figure)
-    plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
-    plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
+    # plt.figure(figure)
+    # plt.plot(list(range(0,len(r[b]))),[b]*len(r[b]),label = "expected for c = " + str(b),linewidth=3, color = 'hotpink',zorder=1)
+    # plt.scatter(list(range(0,len(r[b]))),r[b],label = name + " for c = " + str(b), linewidths=1,zorder=2,color = 'black', marker=matplotlib.markers.TICKDOWN)
 
 def weighted_KNN_classification(test_set, element,k):
     total_distances = []
@@ -264,7 +264,7 @@ print( "Average correct rate w/weights: " + str((total / len(types[:mid]))) )
 
 #if ploting uncomment plot lines in plot function, and uncomment below as well
 
-plt.show()
+# plt.show()
 
 
 
